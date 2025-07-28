@@ -17,7 +17,7 @@ env_file_path = ".env"
 
 # Git repository configuration for this stack
 git_provider = "github"  # Update if using different provider
-repo = "basher8383/dockervm-traefik"  # Update with your actual repo path
+repo = "basher83/dockervm-traefik"  # Correct repository path
 branch = "main"
 
 # Environment variables for the stack
