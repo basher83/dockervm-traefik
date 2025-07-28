@@ -8,7 +8,7 @@ deploy = true
 tags = ["infrastructure", "reverse-proxy", "traefik"]
 
 [stack.config]
-server_id = "68699fe9b4a627380b3c1e28"
+server_id = "dockervm"
 file_paths = ["docker-compose.yml"]
 run_directory = "."
 env_file_path = ".env"
