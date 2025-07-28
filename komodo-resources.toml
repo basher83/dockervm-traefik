@@ -15,6 +15,7 @@ env_file_path = ".env"
 git_provider = "github"
 repo = "basher83/dockervm-traefik"
 branch = "main"
+commit = ""  # Use latest commit
 ignore_services = ["logrotate"]
 
 # Environment variables for the stack

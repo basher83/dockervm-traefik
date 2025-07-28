@@ -1,0 +1,217 @@
+# Alternative Komodo Resource Configuration with Embedded File Contents
+# Use this if the repository file access is having issues
+
+[[stack]]
+name = "dockervm-traefik"
+description = "Traefik reverse proxy with socket proxy and SSL termination"
+deploy = true
+tags = ["infrastructure", "reverse-proxy", "traefik"]
+
+[stack.config]
+server_id = "68699fe9b4a627380b3c1e28"
+run_directory = "."
+env_file_path = ".env"
+
+# Environment variables for the stack
+environment = """
+TRAEFIK_VERSION=3.3
+TZ=EST
+DOMAIN=lab.spaceships.work
+SSL_ENABLED=true
+LETSENCRYPT_EMAIL=admin@lab.spaceships.work
+TRAEFIK_HTTP_PORT=8081
+TRAEFIK_HTTPS_PORT=8443
+TRAEFIK_DASHBOARD_PORT=8082
+SOCKET_PROXY_SUBNET=10.91.0.0/24
+TRAEFIK_CPU_LIMIT=1
+TRAEFIK_MEMORY_LIMIT=512M
+METRICS_ENABLED=false
+METRICS_PORT=8083
+"""
+
+# Pre-deploy command to ensure network exists
+[stack.config.pre_deploy]
+path = ""
+command = "docker network create traefik-proxy --driver bridge --attachable || true"
+
+# Embedded file contents (fallback if git repo access fails)
+file_contents = """
+# Networks
+networks:
+  traefik-proxy:
+    external: true
+    name: traefik-proxy
+  socket-proxy:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.91.0.0/24
+
+# Secrets (for production use)
+secrets:
+  basic_auth_credentials:
+    file: ./secrets/basic_auth_credentials
+  cf_dns_api_token:
+    file: ./secrets/cf_dns_api_token
+
+services:
+  # Docker Socket Proxy - Security Enhanced Proxy for Docker Socket
+  socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy:latest
+    container_name: socket-proxy
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      socket-proxy:
+        ipv4_address: 10.91.0.254
+    privileged: true # Set to false for unprivileged LXC containers
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    read_only: true
+    tmpfs:
+      - /run
+    environment:
+      - LOG_LEVEL=warning
+      - ALLOW_START=1
+      - ALLOW_STOP=1
+      - ALLOW_RESTARTS=1
+      # Granted by Default
+      - EVENTS=1
+      - PING=1
+      - VERSION=1
+      # Required for Traefik
+      - CONTAINERS=1
+      - NETWORKS=1
+      - SERVICES=1
+      - TASKS=1
+      - POST=1
+      - INFO=1
+      - IMAGES=1
+      - VOLUMES=1
+      # Revoked by Default (Security)
+      - AUTH=0
+      - SECRETS=0
+      - BUILD=0
+      - COMMIT=0
+      - CONFIGS=0
+      - DISTRIBUTION=0
+      - EXEC=0
+      - NODES=0
+      - PLUGINS=0
+      - SESSION=0
+      - SWARM=0
+      - SYSTEM=0
+      - DISABLE_IPV6=0
+
+  # Traefik 3 - Reverse Proxy
+  traefik:
+    container_name: traefik
+    image: traefik:3.3
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    depends_on:
+      - socket-proxy
+    networks:
+      traefik-proxy:
+      socket-proxy:
+    command:
+      # Global
+      - --global.checkNewVersion=true
+      - --global.sendAnonymousUsage=false
+      
+      # Entry Points
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.traefik.address=:8080
+      
+      # HTTP to HTTPS redirect
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      
+      # API and Dashboard
+      - --api=true
+      - --api.dashboard=true
+      - --api.insecure=true
+      
+      # Logging
+      - --log=true
+      - --log.filePath=/logs/traefik.log
+      - --log.level=INFO
+      - --log.format=json
+      - --accessLog=true
+      - --accessLog.format=json
+      - --accessLog.fields.defaultMode=keep
+      - --accessLog.fields.headers.defaultMode=keep
+      - --accessLog.filePath=/logs/access.log
+      - --accessLog.bufferingSize=100
+      - --accessLog.filters.statusCodes=204-299,400-499,500-599
+      
+      # Docker Provider (via Socket Proxy)
+      - --providers.docker=true
+      - --providers.docker.endpoint=tcp://socket-proxy:2375
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=traefik-proxy
+      
+      # File Provider for dynamic config
+      - --providers.file.directory=/rules
+      - --providers.file.watch=true
+      
+      # TLS Configuration
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.options=tls-opts@file
+      
+      # Certificate Resolver (HTTP Challenge for now)
+      - --certificatesresolvers.letsencrypt.acme.storage=/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=admin@lab.spaceships.work
+      
+      # Default cert resolver
+      - --entrypoints.websecure.http.tls.certresolver=letsencrypt
+      
+    ports:
+      - '8081:80'
+      - '8443:443'
+      - '8082:8080'
+    volumes:
+      - ./config:/rules:ro
+      - ./letsencrypt/acme.json:/acme.json
+      - ./logs:/logs
+    environment:
+      - TZ=UTC
+      # Uncomment and configure for Cloudflare DNS challenge
+      # - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
+    # Uncomment for production secrets
+    # secrets:
+    #   - cf_dns_api_token
+    #   - basic_auth_credentials
+    labels:
+      - 'traefik.enable=true'
+      # Dashboard router
+      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.lab.spaceships.work`)'
+      - 'traefik.http.routers.traefik-dashboard.entrypoints=websecure'
+      - 'traefik.http.routers.traefik-dashboard.service=api@internal'
+      - 'traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt'
+      # Uncomment for basic auth protection
+      # - 'traefik.http.routers.traefik-dashboard.middlewares=basic-auth@file'
+
+  # Log rotation for Traefik logs
+  logrotate:
+    image: alpine:3.18
+    container_name: traefik-logrotate
+    restart: unless-stopped
+    volumes:
+      - ./logs:/logs
+      - ./scripts:/scripts:ro
+    command: >
+      sh -c "
+        apk add --no-cache logrotate &&
+        echo '0 2 * * * /usr/sbin/logrotate /scripts/logrotate.conf' | crontab - &&
+        crond -f -d 0
+      "
+    depends_on:
+      - traefik
+"""
