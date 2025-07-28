@@ -49,16 +49,36 @@ import sys
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib
+    try:
+        import tomli as tomllib
+    except ImportError:
+        print('⚠️  Could not validate TOML (tomllib/tomli not available)')
+        sys.exit(0)
 
 try:
     with open('komodo-resources.toml', 'rb') as f:
-        tomllib.load(f)
+        data = tomllib.load(f)
     print('✅ TOML file is valid')
+    
+    # Check for required stack structure
+    if 'stack' in data:
+        stacks = data['stack'] if isinstance(data['stack'], list) else [data['stack']]
+        for stack in stacks:
+            if 'config' in stack and 'server_id' in stack['config']:
+                server_id = stack['config']['server_id']
+                if server_id != 'your-server-id':
+                    print(f'✅ Server ID is configured: {server_id}')
+                else:
+                    print('⚠️  Server ID still needs to be updated')
+            else:
+                print('❌ Stack config or server_id missing')
+    else:
+        print('❌ No stack configuration found')
+        
 except Exception as e:
     print(f'❌ TOML file has errors: {e}')
     sys.exit(1)
-" 2>/dev/Null || echo "⚠️  Could not validate TOML (python/tomllib not available)"
+" 2>/dev/null || echo "⚠️  Could not validate TOML (python/tomllib not available)"
 else
     echo "⚠️  Could not validate TOML (python not available)"
 fi
