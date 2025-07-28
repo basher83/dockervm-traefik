@@ -117,6 +117,13 @@ echo "4. Refresh ResourceSync and review changes"
 echo "5. Apply the deployment"
 echo ""
 echo "🔗 For more information, see: https://github.com/moghtech/komodo"
+echo ""
+echo "🚨 Troubleshooting common issues:"
+echo "• If you get 'missing field res' error, check Core/Periphery version compatibility"
+echo "• Make sure you're creating a STACK resource, not a REPO resource"
+echo "• Verify the repository URL is accessible: $(git remote get-url origin)"
+echo "• Check that the git provider is correctly configured in Komodo"
+echo "• Ensure the server has network access to GitHub"
 
 # Check for optional metrics configuration
 echo "📊 Checking metrics configuration..."

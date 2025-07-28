@@ -10,7 +10,7 @@ deploy = true
 tags = ["infrastructure", "reverse-proxy", "traefik"]
 
 [stack.config]
-server_id = "your-server-id"  # Replace with your actual Komodo server ID
+server_id = "68699fe9b4a627380b3c1e28"  # Replace with your actual Komodo server ID
 file_paths = ["docker-compose.yml"]
 run_directory = "."
 env_file_path = ".env"
@@ -24,7 +24,7 @@ branch = "main"
 environment = """
 # Traefik Configuration
 TRAEFIK_VERSION=3.3
-TZ=UTC
+TZ=EST
 DOMAIN=lab.spaceships.work
 
 # SSL Configuration
