@@ -1,0 +1,8 @@
+# Keep this directory in git for Let's Encrypt certificate storage
+# This directory contains:
+# - acme.json - Let's Encrypt certificate storage (ignored by git for security)
+#
+# Important: 
+# - acme.json must have 600 permissions (owner read/write only)
+# - This file contains private keys and should never be committed to git
+# - The directory structure is required for Traefik certificate resolver

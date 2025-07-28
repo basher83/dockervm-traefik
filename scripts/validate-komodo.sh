@@ -117,3 +117,27 @@ echo "4. Refresh ResourceSync and review changes"
 echo "5. Apply the deployment"
 echo ""
 echo "🔗 For more information, see: https://github.com/moghtech/komodo"
+
+# Check for optional metrics configuration
+echo "📊 Checking metrics configuration..."
+if grep -q "METRICS_ENABLED" .env.example && grep -q "metrics.prometheus" docker-compose.yml; then
+    echo "✅ Metrics configuration available"
+else
+    echo "⚠️  Metrics configuration might be missing"
+fi
+
+# Check for resource limits
+echo "💾 Checking resource limits..."
+if grep -q "TRAEFIK_CPU_LIMIT" .env.example && grep -q "deploy:" docker-compose.yml; then
+    echo "✅ Resource limits configuration found"
+else
+    echo "⚠️  Resource limits configuration might be missing"
+fi
+
+# Check for health check configuration in TOML
+echo "🏥 Checking health check configuration..."
+if grep -q "health_check" komodo-resources.toml; then
+    echo "✅ Health check configuration found"
+else
+    echo "⚠️  Health check configuration might be missing"
+fi

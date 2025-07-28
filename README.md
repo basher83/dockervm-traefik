@@ -132,6 +132,98 @@ This Traefik setup is designed to work with other containerized services. To int
      - "traefik.http.routers.myapp.tls.certresolver=letsencrypt"
    ```
 
+
+## Migration from Other Proxies
+
+### From Caddy
+
+If you're migrating from Caddy to this Traefik setup:
+
+1. **Export existing routes**:
+   ```bash
+   # Document your current Caddyfile routes
+   cat Caddyfile > caddy_backup.txt
+   ```
+
+2. **Convert Caddyfile rules to Traefik labels**:
+   ```yaml
+   # Caddy: example.com
+   # Traefik equivalent:
+   labels:
+     - "traefik.http.routers.myapp.rule=Host(`example.com`)"
+     - "traefik.http.routers.myapp.entrypoints=websecure"
+     - "traefik.http.routers.myapp.tls.certresolver=letsencrypt"
+   ```
+
+3. **Update port mappings**:
+   - Caddy typically uses ports 80/443
+   - This setup uses 8081/8443 by default
+   - Update your firewall/load balancer accordingly
+
+4. **Certificate migration**:
+   - Let's Encrypt certificates will need to be re-issued
+   - Consider timing the migration during low-traffic periods
+
+### From nginx-proxy
+
+For nginx-proxy users:
+
+1. **Environment variable mapping**:
+   ```bash
+   # nginx-proxy: VIRTUAL_HOST=example.com
+   # Traefik: traefik.http.routers.myapp.rule=Host(`example.com`)
+   ```
+
+2. **SSL certificate handling**:
+   - nginx-proxy-companion → Traefik's built-in Let's Encrypt
+   - Automatic certificate renewal is handled by Traefik
+
+### From Haproxy
+
+1. **Backend configuration**:
+   - HAProxy backends → Traefik service discovery via Docker labels
+   - Health checks → Traefik's automatic health monitoring
+
+2. **Load balancing**:
+   - HAProxy balance algorithms → Traefik middleware configuration
+   - Sticky sessions → Configure via Traefik labels
+
+### General Migration Steps
+
+1. **Preparation**:
+   ```bash
+   # Backup existing configuration
+   docker compose down
+   cp -r /path/to/old/proxy /backup/location/
+   ```
+
+2. **Deploy Traefik stack**:
+   ```bash
+   # Deploy this stack
+   docker network create traefik-proxy --driver bridge --attachable
+   docker compose up -d
+   ```
+
+3. **Migrate services one by one**:
+   ```bash
+   # Update each service's docker-compose.yml
+   # Add Traefik labels and connect to traefik-proxy network
+   ```
+
+4. **Update DNS/Load Balancer**:
+   ```bash
+   # Point your domain to new ports (8081/8443)
+   # Or update upstream load balancer configuration
+   ```
+
+5. **Verify and cleanup**:
+   ```bash
+   # Test all services are accessible
+   # Remove old proxy containers
+   # Clean up unused networks/volumes
+   ```
+
+
 ## Troubleshooting
 
 ### Common Issues

@@ -38,6 +38,14 @@ TRAEFIK_DASHBOARD_PORT=8082
 
 # Docker Socket Proxy Configuration
 SOCKET_PROXY_SUBNET=10.91.0.0/24
+# Resource Limits (optional)
+TRAEFIK_CPU_LIMIT=1
+TRAEFIK_MEMORY_LIMIT=512M
+
+# Monitoring (optional)
+METRICS_ENABLED=false
+METRICS_PORT=8083
+
 """
 
 # Pre-deploy commands to ensure network exists
@@ -54,3 +62,15 @@ ignore_services = ["logrotate"]
 # Registry provider if using private images
 # registry_provider = "your-registry"
 # registry_account = "your-account"
+
+# Health check configuration
+[stack.health_check]
+enabled = true
+interval = "30s"
+timeout = "10s"
+retries = 3
+
+# Optional: Resource monitoring
+[stack.stats]
+enabled = true
+interval = "60s"

@@ -1,0 +1,7 @@
+# Keep this directory in git for Traefik log files
+# This directory will contain:
+# - access.log - Traefik access logs in JSON format
+# - traefik.log - Traefik application logs in JSON format
+#
+# Log rotation is handled by the logrotate service defined in docker-compose.yml
+# Logs are rotated daily with 7-day retention by default
