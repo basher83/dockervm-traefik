@@ -70,7 +70,7 @@ services:
   # Traefik 3 - Reverse Proxy
   traefik:
     container_name: traefik
-    image: traefik:3.3
+    image: traefik:v3.5
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
