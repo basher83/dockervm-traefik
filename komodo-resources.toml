@@ -1,0 +1,56 @@
+# Komodo Resource Definitions for dockervm-traefik
+# This file defines all resources needed to deploy the Traefik stack via Komodo
+
+# Server where the stack will be deployed
+# Update server_id to match your actual server in Komodo
+[[stack]]
+name = "dockervm-traefik"
+description = "Traefik reverse proxy with socket proxy and SSL termination"
+deploy = true
+tags = ["infrastructure", "reverse-proxy", "traefik"]
+
+[stack.config]
+server_id = "your-server-id"  # Replace with your actual Komodo server ID
+file_paths = ["docker-compose.yml"]
+run_directory = "."
+env_file_path = ".env"
+
+# Git repository configuration for this stack
+git_provider = "github"  # Update if using different provider
+repo = "basher8383/dockervm-traefik"  # Update with your actual repo path
+branch = "main"
+
+# Environment variables for the stack
+environment = """
+# Traefik Configuration
+TRAEFIK_VERSION=3.3
+TZ=UTC
+DOMAIN=lab.spaceships.work
+
+# SSL Configuration
+SSL_ENABLED=true
+LETSENCRYPT_EMAIL=admin@lab.spaceships.work
+
+# Network Configuration
+TRAEFIK_HTTP_PORT=8081
+TRAEFIK_HTTPS_PORT=8443
+TRAEFIK_DASHBOARD_PORT=8082
+
+# Docker Socket Proxy Configuration
+SOCKET_PROXY_SUBNET=10.91.0.0/24
+"""
+
+# Pre-deploy commands to ensure network exists
+pre_deploy = """
+docker network create traefik-proxy --driver bridge --attachable || true
+"""
+
+# Ignore services that may not need to be always running
+ignore_services = ["logrotate"]
+
+# Additional environment files if you have secrets
+# additional_env_files = ["secrets/.env"]
+
+# Registry provider if using private images
+# registry_provider = "your-registry"
+# registry_account = "your-account"

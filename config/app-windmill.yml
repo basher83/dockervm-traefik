@@ -1,0 +1,18 @@
+http:
+  routers:
+    windmill-rtr:
+      rule: "Host(`windmill.lab.spaceships.work`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - chain-no-auth  # or chain-basic-auth for protected access
+      service: windmill-svc
+      tls:
+        certResolver: letsencrypt
+        options: tls-opts@file
+
+  services:
+    windmill-svc:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.30.248:8000"  # Windmill server URL

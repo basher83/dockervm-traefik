@@ -1,0 +1,35 @@
+http:
+  middlewares:
+    # No authentication - just security headers and rate limiting
+    chain-no-auth:
+      chain:
+        middlewares:
+          - rate-limit
+          - secure-headers
+          - compression
+    
+    # Basic authentication chain
+    chain-basic-auth:
+      chain:
+        middlewares:
+          - rate-limit
+          - secure-headers
+          - basic-auth
+          - compression
+    
+    # Internal services (stricter rate limiting)
+    chain-internal:
+      chain:
+        middlewares:
+          - internal-whitelist
+          - rate-limit-strict
+          - secure-headers
+          - compression
+    
+    # Public protection (no auth but strict rate limiting)
+    chain-public:
+      chain:
+        middlewares:
+          - rate-limit-strict
+          - secure-headers
+          - compression

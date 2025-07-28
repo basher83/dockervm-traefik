@@ -1,0 +1,17 @@
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 30
+        burst: 50
+    
+    rate-limit-strict:
+      rateLimit:
+        average: 10
+        burst: 20
+        sourceCriterion:
+          ipStrategy:
+            depth: 1
+            
+    compression:
+      compress: {}
