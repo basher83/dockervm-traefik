@@ -178,7 +178,7 @@ services:
 
   # Log rotation for Traefik logs
   logrotate:
-    image: alpine:3.18
+    image: alpine:3.22
     container_name: traefik-logrotate
     restart: unless-stopped
     volumes:
