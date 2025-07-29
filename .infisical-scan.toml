@@ -1,0 +1,102 @@
+# Infisical scan configuration
+# This file configures secret scanning for the repository
+
+# Paths to exclude from scanning
+exclude_paths = [
+    ".git/**",
+    "logs/**",
+    "*.log",
+    "appdata/**/logs/**",
+    "appdata/traefik/acme/**",
+    "secrets/**",  # Actual secrets directory - should be gitignored
+    "backup/**",
+    "db/**",
+    "*.sqlite",
+    "*.db",
+    "acme.json",
+    "docker-compose.override.yml",
+    ".env",
+    ".env.*",
+    "node_modules/**",
+    "*.pyc",
+    "__pycache__/**",
+    ".venv/**",
+    "venv/**"
+]
+
+# File extensions to skip
+exclude_extensions = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".bmp",
+    ".ico",
+    ".pdf",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".7z",
+    ".rar",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib"
+]
+
+# Additional patterns to allow (false positives)
+# These are patterns that might look like secrets but are safe
+allow_list = [
+    # RFC1918 private IPs and Docker networks
+    "192\\.168\\.\\d{1,3}\\.\\d{1,3}",
+    "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}",
+    "172\\.(1[6-9]|2[0-9]|3[01])\\.\\d{1,3}\\.\\d{1,3}",
+    "10\\.91\\.0\\.\\d{1,3}",  # Socket proxy subnet
+    
+    # Common placeholder values
+    "changeme",
+    "CHANGEME",
+    "your-.*-here",
+    "YOUR-.*-HERE",
+    "your_.*_here",
+    "YOUR_.*_HERE",
+    "dockervm",
+    "name_of_your_server_to_deploy_to",
+    
+    # Docker compose variable references
+    "\\$\\{.*\\}",
+    "\\$\\{.*:-.*\\}",
+    
+    # Example/lab domains
+    "example\\.com",
+    "localhost",
+    "127\\.0\\.0\\.1",
+    "lab\\.spaceships\\.work",
+    "themothership\\.work",
+    
+    # Docker internal hostnames
+    "socket-proxy",
+    "traefik",
+    "db",
+    "windmill",
+    "zammad",
+    "arcane",
+    "dozzle",
+    
+    # Common database URLs with placeholders
+    "postgres://postgres:changeme@db/.*",
+    "postgresql://.*:changeme@.*",
+    
+    # Traefik specific
+    "tcp://socket-proxy:2375",
+    "http://socket-proxy:2375",
+    
+    # GitHub URLs
+    "github\\.com/.*",
+    "ghcr\\.io/.*",
+    
+    # Docker registry
+    "docker\\.io/.*",
+    "registry\\.hub\\.docker\\.com/.*"
+]
