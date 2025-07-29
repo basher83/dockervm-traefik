@@ -1,0 +1,18 @@
+services:
+  tfc_agent:
+    image: hashicorp/tfc-agent:latest
+    container_name: tfc_agent
+    user: root
+    env_file:
+      - ./appdata/terraform-agent/agent.list
+    networks:
+      - default
+      - socket-proxy
+    # volumes:
+    #   - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead
+    #   - ./init.sh:/init.sh
+    #   - /etc/group:/host/etc/group:ro
+    environment:
+      - DOCKER_HOST=tcp://socket-proxy:2375
+    #entrypoint: ["/bin/sh", "/init.sh"]
+    restart: unless-stopped

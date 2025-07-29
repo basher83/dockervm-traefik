@@ -1,0 +1,22 @@
+services:
+  backrest:
+    image: garethgeorge/backrest:latest
+    container_name: backrest
+    hostname: backrest
+    volumes:
+      - ./appdata/backrest/data:/data
+      - ./appdata/backrest/config:/config
+      - ./appdata/backrest/cache:/cache
+      - ./appdata/backrest/tmp:/tmp
+      - /opt/docker-data:/userdata  # Mount local paths to backup
+      - /etc/komodo/stacks:/komodo-stacks
+      - /mnt/truenas:/repos     # Mount local repos (optional for remote storage)
+    environment:
+      - BACKREST_DATA=/data
+      - BACKREST_CONFIG=/config/config.json
+      - XDG_CACHE_HOME=/cache
+      - TMPDIR=/tmp
+      - TZ=America/New_York
+    ports:
+      - "9898:9898"
+    restart: unless-stopped

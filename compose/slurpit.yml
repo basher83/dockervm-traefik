@@ -1,0 +1,93 @@
+name: slurpit
+services:
+  slurpit-warehouse:
+    image: slurpit/warehouse:latest
+    container_name: slurpit-warehouse
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/services"]
+      interval: 10s
+      timeout: 10s
+      retries: 360
+    networks:
+      - slurpit-network
+    environment:
+      TZ: ${TZ}
+      WAREHOUSE_PORTAL_URL: http://slurpit-portal
+    volumes:
+      - ./backup/warehouse:/backup/files
+      - ./db/warehouse:/var/lib/mongodb
+      - ./logs/warehouse/mongodb:/var/log/mongodb
+    restart: always
+
+  slurpit-scraper:
+    image: slurpit/scraper:latest
+    container_name: slurpit-scraper
+    depends_on:
+      slurpit-warehouse:
+        condition: service_healthy
+    networks:
+      - slurpit-network
+    environment:
+      TZ: ${TZ}
+      SCRAPER_TIMEOUT: 20
+      SCRAPER_POOLSIZE: 32
+      SCRAPER_WAREHOUSE_HOSTNAME: slurpit-warehouse
+    restart: always
+
+  slurpit-scanner:
+    image: slurpit/scanner:latest
+    container_name: slurpit-scanner
+    depends_on:
+      slurpit-warehouse:
+        condition: service_healthy
+    networks:
+      - slurpit-network
+    environment:
+      TZ: ${TZ}
+      SCANNER_POOLSIZE: 32
+      SCANNER_TIMEOUT: 6
+      # https://slurpit.io/knowledge-base/fine-tune-the-device-finder
+      # SCANNER_ICMP_ENABLED: false
+      # SCANNER_ARP_ENABLED: false
+      # SCANNER_TCP_ENABLED: true
+      # SCANNER_TCP_PORTS: "[22,23]"
+      SCANNER_WAREHOUSE_HOSTNAME: slurpit-warehouse
+
+    restart: always
+
+  slurpit-portal:
+    image: slurpit/portal:latest
+    container_name: slurpit-portal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 360
+    networks:
+      - slurpit-network
+      - traefik-proxy
+    depends_on:
+      slurpit-warehouse:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ}
+      PORTAL_BASE_URL: https://slurpit.themothership.work
+      PORTAL_WAREHOUSE_URL: http://slurpit-warehouse
+    # ports: 
+    #   - "80:80"    # Conflicts with Traefik - use Traefik labels instead
+    #   - "443:443"  # Conflicts with Traefik - use Traefik labels instead
+    expose:
+      - "80"  # Internal port only, accessed via Traefik
+
+    volumes:
+      - ./logs/nginx:/var/log/nginx/
+      - ./logs/mysql:/var/log/mysql/
+      - ./logs/php:/var/log/php/
+      - ./certs:/etc/nginx/certs/
+      - ./db/portal:/var/lib/mysql
+      - ./backup/portal:/backup/files
+    restart: always
+
+networks:
+  slurpit-network:
+    driver: bridge

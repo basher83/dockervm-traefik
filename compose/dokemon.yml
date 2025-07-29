@@ -1,0 +1,16 @@
+services:
+  dokemon:
+    ports:
+      - 9090:9090
+    volumes:
+      - ./dokemondata:/data
+      # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead
+    networks:
+      - default
+      - socket-proxy
+    environment:
+      - DOCKER_HOST=tcp://socket-proxy:2375
+    restart: unless-stopped
+    container_name: dokemon
+    image: productiveops/dokemon:latest
+# Networks are defined in docker-compose-prod.yml

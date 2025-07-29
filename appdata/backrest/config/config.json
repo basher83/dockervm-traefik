@@ -1,0 +1,92 @@
+{
+    "modno": 4,
+    "version": 4,
+    "instance": "backrest-docker-vm",
+    "repos": [
+        {
+            "id": "minio",
+            "uri": "s3:http://192.168.30.152:9000/truenas",
+            "guid": "63ddb01ed0f21aa00c0312c71f131241f8e80b4bc24f2cd0d381df3760502057",
+            "password": "${MINIO_PASSWORD}",
+            "env": [
+                "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}",
+                "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+            ],
+            "prunePolicy": {
+                "schedule": {
+                    "cron": "0 0 1 * *",
+                    "clock": "CLOCK_LAST_RUN_TIME"
+                },
+                "maxUnusedPercent": 10
+            },
+            "checkPolicy": {
+                "schedule": {
+                    "cron": "0 0 1 * *",
+                    "clock": "CLOCK_LAST_RUN_TIME"
+                },
+                "readDataSubsetPercent": 0
+            },
+            "commandPrefix": {}
+        },
+        {
+            "id": "truenas",
+            "uri": "/mnt/truenas",
+            "guid": "2a13d60af7b63bc76e177f4470231c244b58b2b8b1c357ba95c1208f0e9fd315",
+            "password": "${TRUENAS_PASSWORD}",
+            "prunePolicy": {
+                "schedule": {
+                    "cron": "0 0 1 * *",
+                    "clock": "CLOCK_LAST_RUN_TIME"
+                },
+                "maxUnusedPercent": 10
+            },
+            "checkPolicy": {
+                "schedule": {
+                    "cron": "0 0 1 * *",
+                    "clock": "CLOCK_LAST_RUN_TIME"
+                },
+                "readDataSubsetPercent": 0
+            },
+            "commandPrefix": {}
+        }
+    ],
+    "plans": [
+        {
+            "id": "minio-komodo-stack",
+            "repo": "minio",
+            "paths": [
+                "/komodo-stacks"
+            ],
+            "schedule": {
+                "maxFrequencyDays": 5,
+                "clock": "CLOCK_LOCAL"
+            },
+            "retention": {
+                "policyKeepLastN": 30
+            }
+        },
+        {
+            "id": "truenas-komodo-stack",
+            "repo": "truenas",
+            "paths": [
+                "/komodo-stacks"
+            ],
+            "schedule": {
+                "maxFrequencyDays": 3,
+                "clock": "CLOCK_LOCAL"
+            },
+            "retention": {
+                "policyKeepLastN": 30
+            }
+        }
+    ],
+    "auth": {
+        "disabled": true,
+        "users": [
+            {
+                "name": "basher83",
+                "passwordBcrypt": "${BACKREST_PASSWORD}"
+            }
+        ]
+    }
+}

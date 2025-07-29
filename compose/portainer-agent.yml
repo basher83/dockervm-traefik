@@ -1,0 +1,16 @@
+services:
+  agent:
+    ports:
+      - 9001:9001
+    container_name: portainer_agent
+    restart: always
+    networks:
+      - default
+      - socket-proxy
+    volumes:
+      # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - /:/host
+    environment:
+      - DOCKER_HOST=tcp://socket-proxy:2375
+    image: portainer/agent:2.27.6

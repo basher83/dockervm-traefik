@@ -1,0 +1,11 @@
+services:
+  beszel:
+    image: henrygd/beszel:latest
+    container_name: beszel-hub
+    ports:
+      - "8090:8090"  # Expose beszel on port 8090
+    volumes:
+      - ./appdata/beszel/beszel_data:/beszel_data
+    restart: unless-stopped
+    environment:
+      - DISABLE_PASSWORD_AUTH=false

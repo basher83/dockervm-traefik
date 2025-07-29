@@ -1,0 +1,19 @@
+name: tsidp
+services:
+    tsidp:
+        container_name: tsidp
+        restart: always
+        network_mode: host
+        #ports:
+        #    - 443:443
+        environment:
+            - TS_AUTHKEY=${tskey-auth}
+            - TS_HOSTNAME=idp
+            - TSNET_FORCE_LOGIN=1
+        volumes:
+            - tsidp-data:/var/lib/tsidp
+        image: tsidp:latest
+volumes:
+    tsidp-data:
+        external: true
+        name: tsidp-data

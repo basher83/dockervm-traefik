@@ -1,0 +1,19 @@
+services:
+  dockwatch:
+    container_name: dockwatch
+    image: ghcr.io/notifiarr/dockwatch:main
+    restart: unless-stopped
+    ports:
+      - 9999:80/tcp
+    environment:
+      - DOCKER_HOST=tcp://socket-proxy:2375 # Using socket proxy
+      - PUID=1000
+      - PGID=999
+      - TZ=America/New_York
+    networks:
+      - default
+      - socket-proxy
+    volumes:
+      - /home/dockwatch/config:/config
+      # - /var/run/docker.sock:/var/run/docker.sock # Using socket proxy instead
+# Networks are defined in docker-compose-prod.yml

@@ -1,0 +1,19 @@
+name: scalr-agent
+services:
+    agent:
+        networks:
+            - default
+            - socket-proxy
+        volumes:
+            # - /var/run/docker.sock:/var/run/docker.sock # Use Docker Socket Proxy instead
+            - /var/lib/scalr-agent:/var/lib/scalr-agent
+        environment:
+            - SCALR_URL=https://the-mothership.scalr.io
+            - SCALR_TOKEN=${SCALR_API_TOKEN}
+            - SCALR_WORK_DIR=/var/lib/scalr-agent
+            - DOCKER_HOST=tcp://socket-proxy:2375
+        stdin_open: true
+        tty: true
+        container_name: scalr-agent
+        image: scalr/agent:latest
+        command: run
