@@ -9,7 +9,7 @@ tags = ["infrastructure", "reverse-proxy", "traefik"]
 
 [stack.config]
 server_id = "dockervm"
-file_paths = ["docker-compose.yml"]
+file_paths = ["docker-compose-prod.yml"]
 run_directory = "."
 env_file_path = ".env"
 git_provider = "github.com"
@@ -19,6 +19,8 @@ commit = ""  # Use latest commit
 ignore_services = ["logrotate"]
 
 # Environment variables for the stack
+# The environment variables passed to the compose file. They will be written to path defined in env_file_path,
+# which is given relative to the run directory.
 environment = """
 TRAEFIK_VERSION=3.3
 TZ=EST
@@ -33,6 +35,13 @@ TRAEFIK_CPU_LIMIT=1
 TRAEFIK_MEMORY_LIMIT=512M
 METRICS_ENABLED=false
 METRICS_PORT=8083
+DOZZLE_PORT=8084
+DOCKER_HOST=tcp://socket-proxy:2375
+PORT=3100
+WM_IMAGE=ghcr.io/windmill-labs/windmill:main
+DATABASE_URL=postgres://postgres:changeme@db/windmill?sslmode=disable
+NGINX_EXPOSE_PORT=8086
+NGINX_PORT=8080
 """
 
 # Pre-deploy command to ensure network exists

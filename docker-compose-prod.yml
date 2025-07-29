@@ -1,0 +1,68 @@
+########################### NETWORKS
+# Networks
+networks:
+  traefik-proxy:
+    external: true
+    name: traefik-proxy
+  socket-proxy:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.91.0.0/24
+
+########################### SECRETS
+secrets:
+  basic_auth_credentials:
+    file: ./secrets/basic_auth_credentials
+  cf_dns_api_token:
+    file: ./secrets/cf_dns_api_token
+  scalr_api_token:
+    file: ./secrets/scalr_api_token
+  nebula_primary_password:
+    file: ./secrets/nebula_primary_password
+  nebula_replicas_password1:
+    file: ./secrets/nebula_replicas_password1
+  nebula_replicas_password2:
+    file: ./secrets/nebula_replicas_password2
+  tfc_agent_token:
+    file: ./secrets/tfc_agent_token
+  tfc_agent_name:
+    file: ./secrets/tfc_agent_name
+  minio_password:
+    file: ./secrets/minio_password
+  backrest_password:
+    file: ./secrets/backrest_password
+  true_nas_password:
+    file: ./secrets/true_nas_password
+  public_session_secret:
+    file: ./secrets/public_session_secret
+  # SECRETS-PLACEHOLDER-DO-NOT-DELETE
+
+include:
+  ########################### SERVICES
+  # HOSTNAME defined in .env file
+
+  # - compose/$HOSTNAME/custom.yml
+  - compose/socket-proxy.yml
+  - compose/traefik.yml
+  - compose/dozzle.yml
+  - compose/windmill.yml
+  - compose/traefik-access-log.yml
+  - compose/traefik-error-log.yml
+  - compose/arcane.yml
+  - compose/zammad.yml
+  - compose/tsidp.yml
+  - compose/terraform-agent.yml
+  - compose/slurpit.yml
+  - compose/scalr-agent.yml
+  - compose/portainer-agent.yml
+  - compose/orb.yml
+  - compose/dokemon.yml
+  - compose/filestash.yml
+  - compose/backrest.yml
+  - compose/beszel-hub.yml
+  - compose/dockwatch.yml
+  - compose/flowise.yml
+  - compose/hoarder.yml
+  - compose/nebula-sync.yml
+  # SERVICE-PLACEHOLDER-DO-NOT-DELETE

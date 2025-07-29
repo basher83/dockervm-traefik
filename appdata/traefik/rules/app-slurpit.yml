@@ -1,0 +1,18 @@
+http:
+  routers:
+    slurpit-rtr:
+      rule: "Host(`slurpit.lab.spaceships.work`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - chain-no-auth  # or chain-basic-auth for protected access
+      service: slurpit-svc
+      tls:
+        certResolver: letsencrypt
+        options: tls-opts@file
+
+  services:
+    slurpit-svc:
+      loadBalancer:
+        servers:
+          - url: "http://slurpit-portal:80"  # Internal container name and port
