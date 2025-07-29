@@ -1,0 +1,46 @@
+# Komodo Resource Definitions for dockervm-traefik
+# This file defines all resources needed to deploy the Traefik stack via Komodo
+
+[[stack]]
+name = "dockervm-traefik"
+description = "Traefik reverse proxy with socket proxy and SSL termination"
+deploy = true
+after = ["test-logger-01"] # Stacks can depend on deployments, and vice versa.
+tags = ["infrastructure", "reverse-proxy", "traefik"]
+
+[stack.config]
+# Full config definition: [StackConfig](https://docs.rs/komodo_client/latest/komodo_client/entities/stack/struct.StackConfig.html)
+server_id = "name_of_your_server_to_deploy_to"
+file_paths = ["docker-compose.yml"]
+git_provider = "github.com"
+git_account = "your_git_account_name" # clone private repo by specifying account
+repo = "your_git_account_name/your_git_repo_name"
+branch = "main"
+commit = ""  # Use latest commit
+ignore_services = ["logrotate"] 
+# Ignore certain services declared in the compose file when checking the stack status. 
+# For example, an init service might be exited, but the stack should be healthy. 
+# This init service should be in ignore_services.
+
+# The environment variables passed to the compose file. They will be written to path defined in env_file_path,
+# which is given relative to the run directory.
+environment = """
+TRAEFIK_VERSION=3.3
+TZ=EST
+DOMAIN=lab.spaceships.work
+SSL_ENABLED=true
+LETSENCRYPT_EMAIL=admin@lab.spaceships.work
+TRAEFIK_HTTP_PORT=8081
+TRAEFIK_HTTPS_PORT=8443
+TRAEFIK_DASHBOARD_PORT=8082
+SOCKET_PROXY_SUBNET=10.91.0.0/24
+TRAEFIK_CPU_LIMIT=1
+TRAEFIK_MEMORY_LIMIT=512M
+METRICS_ENABLED=false
+METRICS_PORT=8083
+"""
+
+# Pre-deploy command to ensure network exists
+[stack.config.pre_deploy]
+path = ""
+command = "docker network create traefik-proxy --driver bridge --attachable || true"
