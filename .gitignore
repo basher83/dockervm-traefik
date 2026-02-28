@@ -213,3 +213,4 @@ letsencrypt/acme.json
 secrets/.env
 logs/*.log
 letsencrypt/acme.json.*
+.vscode/
